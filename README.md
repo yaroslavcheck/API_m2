@@ -2,7 +2,7 @@
 
 ## Базовый URL  
 ```
-https://f781-185-43-249-253.ngrok-free.app/bot_api/
+https://m2cerber.pythonanywhere.com/bot_api/
 ```
 
 ## 1. Создание платежа
@@ -86,6 +86,3 @@ Signature = payment_id + secret_key
 | `404 Not Found` | Ресурс не найден |
 | `500 Internal Server Error` | Ошибка сервера |
 
----
-📞 **Контакты**  
-Email: `support@example.com`
