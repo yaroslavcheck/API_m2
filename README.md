@@ -1,88 +1,186 @@
-# API платежной системы
+# API paymetns (ПРИЕМ)
 
-## Базовый URL  
-```
-https://m2cerber.pythonanywhere.com/bot_api/
-```
+### URL: ```https://m2cerber.pythonanywhere.com/bot_api/```
+### TEST URL: ```https://testm2cerber.pythonanywhere.com/bot_api/```
 
-## 1. Создание платежа
-**POST** `/new_payment/`
+### 1. Get wallet
+   ```get_wallet/```
+   
+   Method: ```POST```
+   
+   Data:
+   ```
+   {
+   "payment_id": req (str),
+   "user_wallet": req (str),
+   "sum": req (str),
+   "status": "pending",
+   "callback_url": req,
+   "merch_id": req (str),
+   "create_time": req (str)
+   }
+   ```
 
-### Тело запроса:
-```json
-{
-  "payment_id": "1234",
-  "payment_sum": 200,
-  "payment_link": "https://m10.com/...",
-  "payment_recv": "05039201",
-  "status": "pending",
-  "callback_url": "https://webhook.com/...",
-  "merch_id": "1",
-  "user_email": "test@gmail.com",
-  "create_time": "2024-09-28 14:30:00"
-}
-```
+   Headers:
+   ```
+   {
+   "Signature": signature
+   }
+   ```
 
-### Ответ:
-```json
-{
-  "payment_id": "1234",
-  "status": "pending"
-}
-```
+   Return
+   ```
+   {
+   "payment_id": 3636363,
+   "wallet_link": "https://m10.com/...",
+   "image": b"...",
+   "wallet_number": "9378238289"
+   }
+   ```
 
-## 2. Получение статуса платежа
-**POST** `/get_status/`
 
-### Тело запроса:
-```json
-{
-  "payment_id": "1234",
-  "status": "pending"
-}
-```
+### 2. Update status
+   ```update_status/```
 
-### Ответ:
-```json
-{
-  "payment_id": "1234",
-  "status": "pending"/"confirm"/"cancel"
-}
-```
+   If user send money status = "accept", else status = "cancel"
 
-## 3. Получение баланса
-**GET** `/get_balance/`
-
-### Параметры:
-- `merch_id` (обязательный)
-- `callback_url` (опционально)
-
-### Ответ:
-```json
-{
-  "canceled": 350,
-  "confirm": 2000,
-  "pending": 1500
-}
+   Method: ```POST```
+   
+   Data:
+   ```
+   {
+   "payment_id": req (str),
+   "status": red (str)
+   }
 ```
 
-## 4. Подпись запросов (Signature)
-Для всех запросов, кроме `/get_balance/`:
-```
-Signature = payment_id + secret_key + status + payment_sum
-```
-
-Для `/get_balance/`:
-```
-Signature = payment_id + secret_key
+   Headers:
+   ```
+   {
+   "Signature": signature
+   }
 ```
 
-## Ошибки и коды ответов
-| Код | Описание |
-|----|-----------|
-| `200 OK` | Запрос выполнен успешно |
-| `400 Bad Request` | Ошибка в переданных данных |
-| `401 Unauthorized` | Ошибка подписи (Signature) |
-| `404 Not Found` | Ресурс не найден |
-| `500 Internal Server Error` | Ошибка сервера |
+   Return
+   ```
+   {
+   "paymnet_id": 3636363,
+   "status": "confirming"
+   }
+```
 
+### 3. Get status
+   ```get_status/```
+
+   Method: ```GET```
+   
+   Data:
+   ```
+   {
+   "payment_id": req (str),
+   }
+```
+
+   Headers:
+   ```
+   {
+   "Signature": signature
+   }
+```
+
+   Return
+   ```
+   {
+   "payment_id": 3636363,
+   "status": "confirming"/"pending"/"accept"/"cancel"
+   }
+```
+
+### 4. Get balance
+   ```get_balance/```
+
+   If start_date and end_date is null - you will get balance for all time.
+
+   Method: ```GET```
+   
+   Data:
+   ```
+   {
+   "merch_id": req (str),
+   "start_date": optional (str),
+   "end_date": optional (str),
+   "callback_url": Optional
+   }
+```
+
+   Headers:
+   ```
+   {
+   "Signature": signature_balance
+   }
+```
+
+   Return
+   ```
+   {
+   "canceled_sum": 350,
+   "confirm_sum": 2000,
+   "pending_sum": 1500
+   }
+```
+
+
+## My webhooks
+### 1. Accept payment
+
+   Method: ```POST```
+   
+   Data:
+   ```
+   {
+   'status': 'confirm',
+   'payment_id': '3636363',
+   'confirm_sum': '500'
+   }
+```
+
+   Headers:
+   ```
+   {
+   "Signature": signature
+   }
+```
+
+### 2. Cancel payment
+
+   Method: ```POST```
+   
+   Data:
+   ```
+   {
+   'status': 'cancel',
+   'payment_id': '3636363',
+   'confirm_sum': '0'
+   }
+```
+   Headers:
+   ```
+   {
+   "Signature": signature
+   }
+```
+
+### 3. Change sum
+
+   If the first payment came for 200, and the second for 300, then a webhook will come only for 200, then a webhook will come that the payment is confirmed automatically 
+
+   Method: ```POST```
+   
+   Data:
+   ```
+   {
+   "payment_id": 3636363,
+   "confirm_sum": '200',
+   "payment_sum": '500'
+   }
+```
